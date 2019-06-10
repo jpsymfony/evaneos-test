@@ -16,10 +16,23 @@ require_once __DIR__ . '/../src/TemplateManager.php';
 class TemplateManagerTest extends \PHPUnit\Framework\TestCase
 {
     /**
+     * @var \Faker\Generator
+     */
+    protected $faker;
+
+    /**
+     * @var Quote
+     */
+    protected $quote;
+
+
+    /**
      * Init the mocks
      */
     public function setUp(): void
     {
+        $this->faker = \Faker\Factory::create();
+        $this->quote = new Quote($this->faker->randomNumber(), $this->faker->randomNumber(), $this->faker->randomNumber(), $this->faker->date());
     }
 
     /**
@@ -34,12 +47,8 @@ class TemplateManagerTest extends \PHPUnit\Framework\TestCase
      */
     public function test()
     {
-        $faker = \Faker\Factory::create();
-
-        $expectedDestination = DestinationRepository::getInstance()->getById($faker->randomNumber());
+        $expectedDestination = DestinationRepository::getInstance()->getById($this->faker->randomNumber());
         $expectedUser = ApplicationContext::getInstance()->getCurrentUser();
-
-        $quote = new Quote($faker->randomNumber(), $faker->randomNumber(), $faker->randomNumber(), $faker->date());
 
         $template = new Template(
             1,
@@ -59,7 +68,7 @@ www.evaneos.com
         $message = $templateManager->getTemplateComputed(
             $template,
             [
-                'quote' => $quote
+                'quote' => $this->quote
             ]
         );
 

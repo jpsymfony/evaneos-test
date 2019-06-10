@@ -164,4 +164,56 @@ www.evaneos.com
             ['[user:firstname]', '[user:firstname]'],
         ];
     }
+
+    /**
+     * @param string $expected
+     * @param string $text
+     *
+     * @dataProvider fillSummaryHtmlProvider
+     */
+    public function testFillSummaryHtml(string $expected, string $text)
+    {
+        $templateManager = new TemplateManager();
+        $quote = new Quote(1, 2, 3, 'dateQuoted');
+
+        $this->getResultFromMethod($templateManager, 'fillSummaryHtml', [&$text, $quote]);
+        $this->assertStringContainsString($expected, $text);
+    }
+
+    /**
+     * @return array
+     */
+    public function fillSummaryHtmlProvider()
+    {
+        return [
+            ['<p>1</p>', '[quote:summary_html]'],
+            ['[quote:summaryhtml]', '[quote:summaryhtml]'],
+        ];
+    }
+
+    /**
+     * @param string $expected
+     * @param string $text
+     *
+     * @dataProvider fillSummaryProvider
+     */
+    public function testFillSummary(string $expected, string $text)
+    {
+        $templateManager = new TemplateManager();
+        $quote = new Quote(1, 2, 3, 'dateQuoted');
+
+        $this->getResultFromMethod($templateManager, 'fillSummary', [&$text, $quote]);
+        $this->assertStringContainsString($expected, $text);
+    }
+
+    /**
+     * @return array
+     */
+    public function fillSummaryProvider()
+    {
+        return [
+            ['1', '[quote:summary]'],
+            ['[quote:sum]', '[quote:sum]'],
+        ];
+    }
 }

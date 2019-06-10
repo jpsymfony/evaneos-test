@@ -7,9 +7,27 @@ abstract class TemplateBuilder
      */
     protected $applicationContext;
 
+    /**
+     * @var QuoteRepository
+     */
+    protected $quoteRepository;
+
+    /**
+     * @var DestinationRepository
+     */
+    protected $destinationRepository;
+
+    /**
+     * @var SiteRepository
+     */
+    protected $siteRepository;
+
     public function __construct()
     {
         $this->applicationContext = ApplicationContext::getInstance();
+        $this->quoteRepository = QuoteRepository::getInstance();
+        $this->destinationRepository = DestinationRepository::getInstance();
+        $this->siteRepository = SiteRepository::getInstance();
     }
 
     /**

@@ -29,40 +29,40 @@ class TemplateManager extends TemplateBuilder
      */
     protected function hydrateTextWithQuote(string &$text, ?Quote $quote = null): void
     {
-        if ($quote)
-        {
-            $_quoteFromRepository = QuoteRepository::getInstance()->getById($quote->id);
-            $destinationOfQuote = DestinationRepository::getInstance()->getById($quote->destinationId);
-            $usefulObject = SiteRepository::getInstance()->getById($quote->siteId);
+        if ($quote) {
+            $quoteFromRepository = $this->quoteRepository->getById($quote->id);
+            $destinationOfQuote = $this->destinationRepository->getById($quote->destinationId);
+            $usefulObject = $this->siteRepository->getById($quote->siteId);
 
-            $containsSummaryHtml = strpos($text, '[quote:summary_html]');
-            $containsSummary     = strpos($text, '[quote:summary]');
+            $this->fillSummaryHtml($text, $quoteFromRepository);
+            $this->fillSummary($text, $quoteFromRepository);
 
-            if ($containsSummaryHtml !== false || $containsSummary !== false) {
-                if ($containsSummaryHtml !== false) {
-                    $text = str_replace(
-                        '[quote:summary_html]',
-                        Quote::renderHtml($_quoteFromRepository),
-                        $text
-                    );
-                }
-                if ($containsSummary !== false) {
-                    $text = str_replace(
-                        '[quote:summary]',
-                        Quote::renderText($_quoteFromRepository),
-                        $text
-                    );
-                }
-            }
-
-            (strpos($text, '[quote:destination_name]') !== false) and $text = str_replace('[quote:destination_name]',$destinationOfQuote->countryName,$text);
+            (strpos($text, '[quote:destination_name]') !== false) and $text = str_replace('[quote:destination_name]', $destinationOfQuote->countryName, $text);
         }
 
         if (strpos($text, '[quote:destination_link]') !== false) {
-            $text = str_replace('[quote:destination_link]', $usefulObject->url . '/' . $destinationOfQuote->countryName . '/quote/' . $_quoteFromRepository->id, $text);
+            $text = str_replace('[quote:destination_link]', $usefulObject->url . '/' . $destinationOfQuote->countryName . '/quote/' . $quoteFromRepository->id, $text);
         } else {
             $text = str_replace('[quote:destination_link]', '', $text);
         }
+    }
+
+    /**
+     * @param string $text
+     * @param Quote $quote
+     */
+    protected function fillSummaryHtml(string &$text, Quote $quote): void
+    {
+        $text = str_replace('[quote:summary_html]', Quote::renderHtml($quote), $text);
+    }
+
+    /**
+     * @param string $text
+     * @param Quote $quote
+     */
+    protected function fillSummary(string &$text, Quote $quote): void
+    {
+        $text = str_replace('[quote:summary]', Quote::renderText($quote), $text);
     }
 
     /**

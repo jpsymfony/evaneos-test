@@ -12,6 +12,7 @@ require_once __DIR__ . '/../src/Repository/DestinationRepository.php';
 require_once __DIR__ . '/../src/Repository/QuoteRepository.php';
 require_once __DIR__ . '/../src/Repository/SiteRepository.php';
 require_once __DIR__ . '/../src/TemplateManager.php';
+require_once __DIR__ . '/../src/TemplateBuilder.php';
 
 class TemplateManagerTest extends \PHPUnit\Framework\TestCase
 {

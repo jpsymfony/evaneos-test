@@ -22,16 +22,6 @@ class Template
     }
 
     /**
-     * @param mixed $id
-     * @return Template
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-        return $this;
-    }
-
-    /**
      * @return mixed
      */
     public function getSubject()

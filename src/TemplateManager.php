@@ -4,12 +4,14 @@ require_once __DIR__ . '/../src/TemplateBuilder.php';
 
 class TemplateManager extends TemplateBuilder
 {
-    public function getTemplateComputed(Template $tpl, array $data)
+    /**
+     * @param Template $tpl
+     * @param array $data
+     *
+     * @return Template
+     */
+    public function getTemplateComputed(Template $tpl, array $data): Template
     {
-        if (!$tpl) {
-            throw new \RuntimeException('no tpl given');
-        }
-
         $tpl->setSubject($this->build($tpl->getSubject(), $data));
         $tpl->setContent($this->build($tpl->getContent(), $data));
 
@@ -30,20 +32,14 @@ class TemplateManager extends TemplateBuilder
     protected function hydrateTextWithQuote(string &$text, ?Quote $quote = null): void
     {
         if ($quote) {
-            $quoteFromRepository = $this->quoteRepository->getById($quote->id);
-            $destinationOfQuote = $this->destinationRepository->getById($quote->destinationId);
-            $usefulObject = $this->siteRepository->getById($quote->siteId);
+            $quoteFromRepository = $this->quoteRepository->getById($quote->getId());
+            $destinationOfQuote = $this->destinationRepository->getById($quote->getDestinationId());
+            $siteFromRepository = $this->siteRepository->getById($quote->getSiteId());
 
             $this->fillSummaryHtml($text, $quoteFromRepository);
             $this->fillSummary($text, $quoteFromRepository);
-
-            (strpos($text, '[quote:destination_name]') !== false) and $text = str_replace('[quote:destination_name]', $destinationOfQuote->countryName, $text);
-        }
-
-        if (strpos($text, '[quote:destination_link]') !== false) {
-            $text = str_replace('[quote:destination_link]', $usefulObject->url . '/' . $destinationOfQuote->countryName . '/quote/' . $quoteFromRepository->id, $text);
-        } else {
-            $text = str_replace('[quote:destination_link]', '', $text);
+            $this->fillDestinationName($text, $destinationOfQuote);
+            $this->fillDestinationLink($text, $siteFromRepository, $destinationOfQuote, $quoteFromRepository);
         }
     }
 
@@ -63,6 +59,29 @@ class TemplateManager extends TemplateBuilder
     protected function fillSummary(string &$text, Quote $quote): void
     {
         $text = str_replace('[quote:summary]', Quote::renderText($quote), $text);
+    }
+
+    /**
+     * @param string $text
+     * @param Destination $destination
+     */
+    protected function fillDestinationName(string &$text, Destination $destination): void
+    {
+        $text = str_replace('[quote:destination_name]', $destination->getCountryName(), $text);
+    }
+
+    /**
+     * @param string $text
+     * @param Site $site
+     * @param Destination $destination
+     * @param Quote $quote
+     */
+    protected function fillDestinationLink(string &$text, Site $site, Destination $destination, Quote $quote): void
+    {
+        $text = str_replace(
+            '[quote:destination_link]',
+            $site->getUrl() . '/' . $destination->getCountryName() . '/quote/' . $quote->getId(), $text
+        );
     }
 
     /**

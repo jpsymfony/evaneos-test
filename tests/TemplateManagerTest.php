@@ -34,7 +34,7 @@ class TemplateManagerTest extends \App\Tests\TypeTestCase
     public function setUp(): void
     {
         $this->faker = \Faker\Factory::create();
-        $this->quote = new Quote($this->faker->randomNumber(), $this->faker->randomNumber(), $this->faker->randomNumber(), $this->faker->date());
+        $this->quote = new Quote($this->faker->randomNumber(), $this->faker->randomNumber(), $this->faker->randomNumber(), $this->faker->dateTime);
     }
 
     /**
@@ -44,13 +44,11 @@ class TemplateManagerTest extends \App\Tests\TypeTestCase
     {
     }
 
-    /**
-     * @test
-     */
-    public function test()
+    public function testGetTemplateComputed()
     {
         $expectedDestination = DestinationRepository::getInstance()->getById($this->faker->randomNumber());
         $expectedUser = ApplicationContext::getInstance()->getCurrentUser();
+        $expectedSite = SiteRepository::getInstance()->getById($this->quote->getSiteId());
 
         $template = new Template(
             1,
@@ -59,6 +57,11 @@ class TemplateManagerTest extends \App\Tests\TypeTestCase
 Bonjour [user:first_name],
 
 Merci d'avoir contacté un agent local pour votre voyage [quote:destination_name].
+
+Le lien vers votre destination est: [quote:destination_link].
+
+Le résumé html est: [quote:summary_html].
+Le résumé non html est: [quote:summary].
 
 Bien cordialement,
 
@@ -74,17 +77,31 @@ www.evaneos.com
             ]
         );
 
-        $this->assertEquals('Votre voyage avec une agence locale ' . $expectedDestination->countryName, $message->getSubject());
-        $this->assertEquals("
-Bonjour " . $expectedUser->getFirstname() . ",
+        $this->assertEquals('Votre voyage avec une agence locale ' . $expectedDestination->getCountryName(), $message->getSubject());
+        $this->assertEquals(
+            sprintf("
+Bonjour %s,
 
-Merci d'avoir contacté un agent local pour votre voyage " . $expectedDestination->countryName . ".
+Merci d'avoir contacté un agent local pour votre voyage %s.
+
+Le lien vers votre destination est: %s.
+
+Le résumé html est: %s.
+Le résumé non html est: %s.
 
 Bien cordialement,
 
 L'équipe Evaneos.com
 www.evaneos.com
-", $message->getContent());
+",
+                $expectedUser->getFirstname(),
+                $expectedDestination->getCountryName(),
+                $expectedSite->getUrl() . '/' . $expectedDestination->getCountryName() . '/quote/' . $this->quote->getId(),
+                sprintf('<p>%d</p>', $this->quote->getId()),
+                $this->quote->getId()
+            ),
+            $message->getContent()
+        );
     }
 
     /**
@@ -174,7 +191,7 @@ www.evaneos.com
     public function testFillSummaryHtml(string $expected, string $text)
     {
         $templateManager = new TemplateManager();
-        $quote = new Quote(1, 2, 3, 'dateQuoted');
+        $quote = new Quote(1, 2, 3, new \DateTime());
 
         $this->getResultFromMethod($templateManager, 'fillSummaryHtml', [&$text, $quote]);
         $this->assertStringContainsString($expected, $text);
@@ -200,7 +217,7 @@ www.evaneos.com
     public function testFillSummary(string $expected, string $text)
     {
         $templateManager = new TemplateManager();
-        $quote = new Quote(1, 2, 3, 'dateQuoted');
+        $quote = new Quote(1, 2, 3, new \DateTime());
 
         $this->getResultFromMethod($templateManager, 'fillSummary', [&$text, $quote]);
         $this->assertStringContainsString($expected, $text);
@@ -214,6 +231,60 @@ www.evaneos.com
         return [
             ['1', '[quote:summary]'],
             ['[quote:sum]', '[quote:sum]'],
+        ];
+    }
+
+    /**
+     * @param string $expected
+     * @param string $text
+     *
+     * @dataProvider fillDestinationNameProvider
+     */
+    public function testFillDestinationName(string $expected, string $text)
+    {
+        $templateManager = new TemplateManager();
+        $destination = new Destination(1, 'countryName', 'conjunction', 'computerName');
+
+        $this->getResultFromMethod($templateManager, 'fillDestinationName', [&$text, $destination]);
+        $this->assertStringContainsString($expected, $text);
+    }
+
+    /**
+     * @return array
+     */
+    public function fillDestinationNameProvider()
+    {
+        return [
+            ['countryName', '[quote:destination_name]'],
+            ['[quote:destination]', '[quote:destination]'],
+        ];
+    }
+
+    /**
+     * @param string $expected
+     * @param string $text
+     *
+     * @dataProvider fillDestinationLinkProvider
+     */
+    public function testFillDestinationLink(string $expected, string $text)
+    {
+        $templateManager = new TemplateManager();
+        $site = new Site(1, 'url');
+        $destination = new Destination(1, 'countryName', 'conjunction', 'computerName');
+        $quote = new Quote(1, 2, 3, new \DateTime());
+
+        $this->getResultFromMethod($templateManager, 'fillDestinationLink', [&$text, $site, $destination, $quote]);
+        $this->assertStringContainsString($expected, $text);
+    }
+
+    /**
+     * @return array
+     */
+    public function fillDestinationLinkProvider()
+    {
+        return [
+            ['url/countryName/quote/1', '[quote:destination_link]'],
+            ['[quote:destination]', '[quote:destination]'],
         ];
     }
 }

@@ -22,7 +22,9 @@ abstract class TemplateBuilder
     {
         $quote = $this->getQuote($data);
         $this->hydrateTextWithQuote($text, $quote);
-        $this->hydrateTextWithUser($text, $data);
+
+        $user = $this->getUser($data);
+        $this->hydrateTextWithUser($text, $user);
 
         return $text;
     }
@@ -41,8 +43,15 @@ abstract class TemplateBuilder
     abstract protected function hydrateTextWithQuote(string &$text, ?Quote $quote = null): void;
 
     /**
-     * @param string $text
      * @param array $data
+     *
+     * @return User
      */
-    abstract protected function hydrateTextWithUser(string &$text, array $data): void;
+    abstract protected function getUser(array $data): User;
+
+    /**
+     * @param string $text
+     * @param User $user
+     */
+    abstract protected function hydrateTextWithUser(string &$text, User $user): void;
 }

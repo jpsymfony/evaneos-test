@@ -76,7 +76,7 @@ www.evaneos.com
 
         $this->assertEquals('Votre voyage avec une agence locale ' . $expectedDestination->countryName, $message->getSubject());
         $this->assertEquals("
-Bonjour " . $expectedUser->firstname . ",
+Bonjour " . $expectedUser->getFirstname() . ",
 
 Merci d'avoir contacté un agent local pour votre voyage " . $expectedDestination->countryName . ".
 
@@ -88,12 +88,12 @@ www.evaneos.com
     }
 
     /**
-     * @param $expected
+     * @param Quote|null $expected
      * @param array $data
      *
      * @dataProvider getQuoteProvider
      */
-    public function testGetQuote($expected, array $data)
+    public function testGetQuote(?Quote $expected, array $data)
     {
         $templateManager = new TemplateManager();
 
@@ -108,6 +108,60 @@ www.evaneos.com
         return [
             [null, []],
             [$this->quote, ['quote' => $this->quote]],
+        ];
+    }
+
+    /**
+     * @param User $expected
+     * @param array $data
+     *
+     * @dataProvider getUserProvider
+     */
+    public function testGetUser(User $expected, array $data)
+    {
+        $templateManager = new TemplateManager();
+
+        $this->assertEquals($expected, $this->getResultFromMethod($templateManager, 'getUser', [$data]));
+    }
+
+    /**
+     * @return array
+     */
+    public function getUserProvider()
+    {
+        $user = new User(1, 'firstName', 'lastName', 'email');
+        $userApplication = ApplicationContext::getInstance()->getCurrentUser();
+
+        return [
+            [$user, ['user' => $user]],
+            [$userApplication, ['user' => null]],
+            [$userApplication, []],
+        ];
+    }
+
+    /**
+     * @param string $expected
+     * @param string $text
+     *
+     * @dataProvider hydrateTextWithUserProvider
+     */
+    public function testHydrateTextWithUser(string $expected, string $text)
+    {
+        $templateManager = new TemplateManager();
+        $user = new User(1, 'firstName', 'lastName', 'email');
+
+        $this->getResultFromMethod($templateManager, 'hydrateTextWithUser', [&$text, $user]);
+        $this->assertStringContainsString($expected, $text);
+    }
+
+    /**
+     * @return array
+     */
+    public function hydrateTextWithUserProvider()
+    {
+        return [
+            ['Firstname', '[user:first_name]'],
+            ['[user:firstname]', '[user:firstname]'],
         ];
     }
 }

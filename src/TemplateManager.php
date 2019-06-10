@@ -68,11 +68,16 @@ class TemplateManager extends TemplateBuilder
     /**
      * @inheritDoc
      */
-    protected function hydrateTextWithUser(string &$text, array $data): void
+    protected function hydrateTextWithUser(string &$text, User $user): void
     {
-        $_user  = (isset($data['user'])  and ($data['user']  instanceof User))  ? $data['user']  : $this->applicationContext->getCurrentUser();
-        if($_user) {
-            (strpos($text, '[user:first_name]') !== false) and $text = str_replace('[user:first_name]'       , ucfirst(mb_strtolower($_user->firstname)), $text);
-        }
+        $text = str_replace('[user:first_name]', ucfirst(mb_strtolower($user->getFirstname())), $text);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getUser(array $data): User
+    {
+        return (isset($data['user']) and ($data['user'] instanceof User)) ? $data['user'] : $this->applicationContext->getCurrentUser();
     }
 }

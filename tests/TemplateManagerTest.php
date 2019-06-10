@@ -13,8 +13,9 @@ require_once __DIR__ . '/../src/Repository/QuoteRepository.php';
 require_once __DIR__ . '/../src/Repository/SiteRepository.php';
 require_once __DIR__ . '/../src/TemplateManager.php';
 require_once __DIR__ . '/../src/TemplateBuilder.php';
+require_once __DIR__ . '/../tests/TypeTestCase.php';
 
-class TemplateManagerTest extends \PHPUnit\Framework\TestCase
+class TemplateManagerTest extends \App\Tests\TypeTestCase
 {
     /**
      * @var \Faker\Generator
@@ -84,5 +85,29 @@ Bien cordialement,
 L'équipe Evaneos.com
 www.evaneos.com
 ", $message->getContent());
+    }
+
+    /**
+     * @param $expected
+     * @param array $data
+     *
+     * @dataProvider getQuoteProvider
+     */
+    public function testGetQuote($expected, array $data)
+    {
+        $templateManager = new TemplateManager();
+
+        $this->assertEquals($expected, $this->getResultFromMethod($templateManager, 'getQuote', [$data]));
+    }
+
+    /**
+     * @return array
+     */
+    public function getQuoteProvider()
+    {
+        return [
+            [null, []],
+            [$this->quote, ['quote' => $this->quote]],
+        ];
     }
 }

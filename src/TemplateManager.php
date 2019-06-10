@@ -4,16 +4,6 @@ require_once __DIR__ . '/../src/TemplateBuilder.php';
 
 class TemplateManager extends TemplateBuilder
 {
-    /**
-     * @var ApplicationContext
-     */
-    protected $applicationContext;
-
-    public function __construct()
-    {
-        $this->applicationContext = ApplicationContext::getInstance();
-    }
-
     public function getTemplateComputed(Template $tpl, array $data)
     {
         if (!$tpl) {
@@ -24,5 +14,13 @@ class TemplateManager extends TemplateBuilder
         $tpl->setContent($this->build($tpl->getContent(), $data));
 
         return $tpl;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getQuote(array $data): ?Quote
+    {
+        return (isset($data['quote']) and $data['quote'] instanceof Quote) ? $data['quote'] : null;
     }
 }

@@ -1,7 +1,17 @@
 <?php
 
-class TemplateBuilder
+abstract class TemplateBuilder
 {
+    /**
+     * @var ApplicationContext
+     */
+    protected $applicationContext;
+
+    public function __construct()
+    {
+        $this->applicationContext = ApplicationContext::getInstance();
+    }
+
     /**
      * @param string $text
      * @param array $data
@@ -10,7 +20,7 @@ class TemplateBuilder
      */
     public function build(string $text, array $data): string
     {
-        $quote = (isset($data['quote']) and $data['quote'] instanceof Quote) ? $data['quote'] : null;
+        $quote = $this->getQuote($data);
 
         if ($quote)
         {
@@ -58,4 +68,11 @@ class TemplateBuilder
 
         return $text;
     }
+
+    /**
+     * @param array $data
+     *
+     * @return Quote|null
+     */
+    abstract protected function getQuote(array $data): ?Quote;
 }

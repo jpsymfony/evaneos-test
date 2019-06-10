@@ -18,11 +18,10 @@ class TemplateManager
             throw new \RuntimeException('no tpl given');
         }
 
-        $replaced = clone($tpl);
-        $replaced->subject = $this->computeText($replaced->subject, $data);
-        $replaced->content = $this->computeText($replaced->content, $data);
+        $tpl->setSubject($this->computeText($tpl->getSubject(), $data));
+        $tpl->setContent($this->computeText($tpl->getContent(), $data));
 
-        return $replaced;
+        return $tpl;
     }
 
     private function computeText($text, array $data)

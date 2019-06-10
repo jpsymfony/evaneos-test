@@ -72,7 +72,7 @@ www.evaneos.com
             ]
         );
 
-        $this->assertEquals('Votre voyage avec une agence locale ' . $expectedDestination->countryName, $message->subject);
+        $this->assertEquals('Votre voyage avec une agence locale ' . $expectedDestination->countryName, $message->getSubject());
         $this->assertEquals("
 Bonjour " . $expectedUser->firstname . ",
 
@@ -82,6 +82,6 @@ Bien cordialement,
 
 L'équipe Evaneos.com
 www.evaneos.com
-", $message->content);
+", $message->getContent());
     }
 }
